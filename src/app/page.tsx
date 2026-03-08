@@ -1,183 +1,756 @@
 "use client";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { FaFacebookF, FaLinkedinIn, FaInstagram, FaBullseye, FaRocket, FaHandsHelping } from "react-icons/fa";
 
+import React, { useState, useEffect, useRef, ReactNode, CSSProperties } from "react";
+import Link from "next/link";
+import {
+  FaBullseye,
+  FaRocket,
+  FaHandsHelping,
+  FaStar,
+  FaQuoteLeft,
+  FaChevronLeft,
+  FaChevronRight,
+  FaEnvelope,
+  FaChartLine,
+  FaUserTie,
+  FaGraduationCap,
+  FaHandshake,
+  FaMicrophone,
+  FaArrowRight,
+  FaLock,
+} from "react-icons/fa";
+
+/* ══════════════════════════════════════════
+   TYPES
+══════════════════════════════════════════ */
+interface AdnCard      { title: string; desc: string; icon: ReactNode; num: string; }
+interface Expert       { name: string; role: string; xp: string; tags: string[]; rating: number; missions: number; initials: string; }
+interface Partner      { name: string; sector: string; }
+interface Testimony    { quote: string; author: string; role: string; rating: number; }
+interface ExpertiseItem{ icon: ReactNode; title: string; desc: string; color: string; }
+
+/* ══════════════════════════════════════════
+   HOOK
+══════════════════════════════════════════ */
+function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement | null>, boolean] {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, inView];
+}
+
+interface FadeUpProps { children: ReactNode; delay?: number; className?: string; }
+function FadeUp({ children, delay = 0, className = "" }: FadeUpProps) {
+  const [ref, inView] = useInView();
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? "translateY(0px)" : "translateY(48px)",
+        transition: `opacity 0.75s cubic-bezier(.22,1,.36,1) ${delay}s, transform 0.75s cubic-bezier(.22,1,.36,1) ${delay}s`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   DONNÉES STATIQUES
+══════════════════════════════════════════ */
+const adnCards: AdnCard[] = [
+  { title: "Vision",  num: "01", icon: <FaBullseye />,     desc: "Devenir la référence en accompagnement de startups innovantes, en connectant les meilleurs talents aux projets les plus ambitieux." },
+  { title: "Mission", num: "02", icon: <FaRocket />,       desc: "Offrir aux startups un accès privilégié à des experts certifiés pour structurer leur stratégie, accélérer leur croissance et lever des fonds." },
+  { title: "Valeurs", num: "03", icon: <FaHandsHelping />, desc: "Excellence, transparence et engagement. Nous plaçons l'humain au cœur de chaque accompagnement pour un impact durable." },
+];
+
+const experts: Expert[] = [
+  { name: "Karim Benali",   role: "Expert Marketing Digital",        xp: "8 ans",  tags: ["Growth", "SEO", "Branding"], rating: 5, missions: 42, initials: "KB" },
+  { name: "Sofia Mansouri", role: "Expert Finance & Levée de fonds", xp: "12 ans", tags: ["VC", "M&A", "CFO"],          rating: 5, missions: 67, initials: "SM" },
+  { name: "Youssef Tazi",   role: "Expert Tech & Produit",           xp: "10 ans", tags: ["SaaS", "MVP", "Agile"],      rating: 5, missions: 55, initials: "YT" },
+  { name: "Leila Osman",    role: "Expert RH & Management",          xp: "9 ans",  tags: ["Recrutement", "OKR"],        rating: 5, missions: 38, initials: "LO" },
+];
+
+const partners: Partner[] = [
+  { name: "TechVentures",  sector: "Fonds d'investissement" },
+  { name: "InnoHub",       sector: "Incubateur" },
+  { name: "StartupNation", sector: "Accélérateur" },
+  { name: "CapitalGrow",   sector: "Private Equity" },
+  { name: "AfricaTech",    sector: "Réseau startup" },
+  { name: "EuroFund",      sector: "Financement EU" },
+  { name: "DigitalNext",   sector: "Transformation digitale" },
+  { name: "GrowthLab",     sector: "Studio de croissance" },
+];
+
+const testimonials: Testimony[] = [
+  { quote: "Grâce à Business Expert Hub, nous avons structuré notre stratégie en 3 semaines et levé 500k€ dès le trimestre suivant.", author: "Mehdi Charfi",    role: "CEO, Startup ABC",        rating: 5 },
+  { quote: "Les experts Business Expert Hub ont transformé notre approche commerciale. Notre CA a doublé en 6 mois.",                 author: "Amira Khaled",   role: "Fondatrice, Startup XYZ", rating: 5 },
+  { quote: "Un accompagnement sur mesure, réactif et vraiment efficace. Business Expert Hub est un vrai partenaire de croissance.",   author: "Bilel Trabelsi", role: "CTO, Startup Delta",      rating: 5 },
+  { quote: "La mise en relation avec l'expert finance a été déterminante pour notre levée Série A.",                        author: "Nour Ben Ali",   role: "COO, Startup Omega",      rating: 5 },
+];
+
+const navServices = [
+  { label: "Consulting",     slug: "consulting"     },
+  { label: "Audit sur site", slug: "audit-sur-site" },
+  { label: "Accompagnement", slug: "accompagnement" },
+  { label: "Formations",     slug: "formations"     },
+  { label: "Podcasts",       slug: "podcasts"       },
+];
+
+/* ══════════════════════════════════════════
+   PAGE
+══════════════════════════════════════════ */
 export default function Home() {
   const [servicesOpen, setServicesOpen] = useState(false);
-
-  // Hero images (change chaque 3 secondes)
-  const heroImages = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg"];
-  const [currentImage, setCurrentImage] = useState(0);
+  const [active, setActive]             = useState(0);
+  const [animating, setAnimating]       = useState(false);
+  const [email, setEmail]               = useState("");
+  const [submitted, setSubmitted]       = useState(false);
+  const [showModal, setShowModal]       = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % heroImages.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+    const t = setInterval(() => { goTo((active + 1) % testimonials.length); }, 5000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
 
-  const adnCards = [
-    { title: "Vision", desc: "Notre vision pour propulser les startups vers l’excellence.", icon: <FaBullseye className="text-[#F7B500] text-5xl mb-4 mx-auto" /> },
-    { title: "Mission", desc: "Notre mission pour booster les startups et leurs experts.", icon: <FaRocket className="text-[#F7B500] text-5xl mb-4 mx-auto" /> },
-    { title: "Valeurs", desc: "Nos valeurs clés pour un accompagnement de qualité.", icon: <FaHandsHelping className="text-[#F7B500] text-5xl mb-4 mx-auto" /> },
-  ];
+  function goTo(idx: number) {
+    if (animating) return;
+    setAnimating(true);
+    setTimeout(() => { setActive(idx); setAnimating(false); }, 280);
+  }
 
-  const experts = [
-    { name: "Expert Marketing", role: "Spécialiste croissance startup" },
-    { name: "Expert Finance", role: "Conseil en levée de fonds" },
-    { name: "Expert Tech", role: "Développement produit" },
-  ];
-
-  const testimonials = [
-    { text: "Grâce à StartUp Connect, notre startup a doublé son chiffre d'affaires en 6 mois!", author: "Startup ABC" },
-    { text: "Les experts m'ont accompagné efficacement dans ma levée de fonds.", author: "Startup XYZ" },
-  ];
+  function handleNewsletter(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (email) { setSubmitted(true); setEmail(""); }
+  }
 
   return (
-    <div className="font-sans text-gray-700">
+    <div className="font-[Plus_Jakarta_Sans,sans-serif] text-gray-700">
 
-      {/* ================= HEADER ================= */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex justify-between items-center p-4">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
 
-          {/* Menu */}
-          <ul className="flex gap-6 items-center text-[#0A2540]">
-            <li className="hover:text-[#F7B500] cursor-pointer transition-colors">Accueil</li>
-            <li className="hover:text-[#F7B500] cursor-pointer transition-colors">A propos</li>
-            <li className="relative" onMouseEnter={() => setServicesOpen(true)} onMouseLeave={() => setServicesOpen(false)}>
-              <span className="cursor-pointer hover:text-[#F7B500] transition-colors">Services</span>
+        @keyframes marquee {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .marquee-track {
+          display: flex;
+          gap: 20px;
+          width: max-content;
+          animation: marquee 26s linear infinite;
+        }
+        .marquee-track:hover { animation-play-state: paused; }
+
+        @keyframes pulse-ring {
+          0%   { transform: scale(1);    opacity: .6; }
+          100% { transform: scale(1.65); opacity: 0;  }
+        }
+        .pulse-dot::after {
+          content: '';
+          position: absolute;
+          inset: -4px;
+          border-radius: 50%;
+          border: 2px solid #22C55E;
+          animation: pulse-ring 1.8s ease-out infinite;
+        }
+
+        @keyframes floatY {
+          0%, 100% { transform: translateY(-50%) rotate(45deg); }
+          50%       { transform: translateY(calc(-50% - 16px)) rotate(45deg); }
+        }
+        .diamond-float { animation: floatY 6s ease-in-out infinite; }
+
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.92) translateY(20px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-box { animation: modalIn .3s cubic-bezier(.22,1,.36,1); }
+
+        .card-adn:hover         { transform: translateY(-10px) !important; box-shadow: 0 24px 56px rgba(10,37,64,0.16) !important; }
+        .card-partner:hover     { border-color: rgba(247,181,0,0.5) !important; background: rgba(247,181,0,0.07) !important; }
+        .expert-card:hover      { transform: translateY(-8px); box-shadow: 0 20px 48px rgba(10,37,64,0.12); border-color: rgba(247,181,0,0.4) !important; }
+        .expert-card:hover .expert-btn { background: #F7B500 !important; color: #0A2540 !important; }
+
+        .nav-link { color: #0A2540; text-decoration: none; font-size: 15px; font-weight: 500; transition: color .2s; }
+        .nav-link:hover { color: #F7B500; }
+        .nav-link-active { color: #F7B500 !important; font-weight: 700; }
+
+        .drop-item { display: block; padding: 10px 16px; color: #0A2540; text-decoration: none; font-size: 14px; font-weight: 600; transition: background .15s; white-space: nowrap; }
+        .drop-item:hover { background: #FFFBEB; }
+
+        .btn-gold {
+          display: inline-flex; align-items: center; gap: 8px;
+          background: #F7B500; color: #0A2540;
+          border: none; border-radius: 10px;
+          padding: 13px 28px; font-weight: 800; font-size: 15px;
+          cursor: pointer; font-family: inherit;
+          transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+          text-decoration: none;
+        }
+        .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(247,181,0,0.38); background: #e6a800; }
+
+        .btn-outline {
+          display: inline-flex; align-items: center; gap: 8px;
+          background: transparent; color: #F7B500;
+          border: 2px solid #F7B500; border-radius: 10px;
+          padding: 13px 28px; font-weight: 700; font-size: 15px;
+          cursor: pointer; font-family: inherit;
+          transition: transform 0.22s ease, background 0.22s ease;
+          text-decoration: none;
+        }
+        .btn-outline:hover { transform: translateY(-3px); background: rgba(247,181,0,0.1); }
+
+        .btn-conn {
+          border: 2px solid #0A2540; color: #0A2540; background: transparent;
+          padding: 9px 22px; border-radius: 9px; font-weight: 700; font-size: 14px;
+          cursor: pointer; transition: all .22s; font-family: inherit;
+        }
+        .btn-conn:hover { background: #F7B500; border-color: #F7B500; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(247,181,0,0.30); }
+
+        .btn-insc {
+          background: #F7B500; color: #0A2540; border: 2px solid #F7B500;
+          padding: 9px 22px; border-radius: 9px; font-weight: 800; font-size: 14px;
+          cursor: pointer; transition: all .22s; font-family: inherit;
+        }
+        .btn-insc:hover { background: #e6a800; border-color: #e6a800; transform: translateY(-2px); box-shadow: 0 8px 22px rgba(247,181,0,0.40); }
+
+        .btn-navy {
+          background: #0A2540; color: white; border: none; border-radius: 9px;
+          padding: 10px 24px; font-weight: 700; cursor: pointer; font-size: 14px;
+          transition: all 0.22s ease; font-family: inherit;
+        }
+        .btn-navy:hover { background: #F7B500; color: #0A2540; transform: translateY(-3px); box-shadow: 0 10px 28px rgba(247,181,0,0.3); }
+
+        .btn-modal-primary {
+          width: 100%; background: #F7B500; color: #0A2540; border: none; border-radius: 10px;
+          padding: 13px 24px; font-weight: 800; font-size: 15px; cursor: pointer;
+          transition: all .22s; font-family: inherit;
+        }
+        .btn-modal-primary:hover { background: #e6a800; transform: translateY(-2px); box-shadow: 0 8px 22px rgba(247,181,0,0.4); }
+
+        .btn-modal-secondary {
+          width: 100%; background: transparent; color: #0A2540; border: 2px solid rgba(10,37,64,0.18);
+          border-radius: 10px; padding: 11px 24px; font-weight: 700; font-size: 15px; cursor: pointer;
+          transition: all .22s; font-family: inherit;
+        }
+        .btn-modal-secondary:hover { border-color: #0A2540; transform: translateY(-2px); }
+
+        .arrow-btn {
+          width: 48px; height: 48px; border-radius: 50%; background: #0A2540; border: none;
+          color: white; font-size: 17px; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 4px 18px rgba(10,37,64,0.22); transition: all 0.22s ease;
+          position: absolute; top: 50%; transform: translateY(-50%); font-family: inherit;
+        }
+        .arrow-btn:hover { background: #F7B500; color: #0A2540; transform: translateY(-50%) scale(1.1); }
+
+        .newsletter-input {
+          flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+          border-radius: 10px; padding: 14px 20px; color: white; font-size: 15px;
+          outline: none; transition: border-color 0.2s; font-family: inherit;
+        }
+        .newsletter-input:focus { border-color: rgba(247,181,0,0.6); }
+        .newsletter-input::placeholder { color: rgba(255,255,255,0.4); }
+      `}</style>
+
+      {/* ══════════════════════════════════════
+          MODAL
+      ══════════════════════════════════════ */}
+      {showModal && (
+        <div
+          className="fixed inset-0 z-[999] flex items-center justify-center p-6"
+          style={{ background: "rgba(10,37,64,0.65)", backdropFilter: "blur(4px)" }}
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="modal-box bg-white rounded-3xl text-center relative w-full max-w-[440px]"
+            style={{ padding: "48px 44px", boxShadow: "0 32px 80px rgba(10,37,64,0.25)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="w-[72px] h-[72px] rounded-full flex items-center justify-center text-[30px] text-[#0A2540] mx-auto mb-6"
+              style={{ background: "linear-gradient(135deg,#F7B500,#e6a800)", boxShadow: "0 10px 28px rgba(247,181,0,0.35)" }}
+            >
+              <FaLock />
+            </div>
+            <h2 className="text-2xl font-black text-[#0A2540] mb-3">Inscription requise</h2>
+            <p className="text-gray-500 text-[15px] leading-relaxed mb-8">
+              Pour consulter le profil complet de cet expert, vous devez créer un compte ou vous connecter à votre espace Business Expert Hub.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link href="/inscription" onClick={() => setShowModal(false)}>
+                <button className="btn-modal-primary">Créer un compte gratuitement</button>
+              </Link>
+              <Link href="/connexion" onClick={() => setShowModal(false)}>
+                <button className="btn-modal-secondary">{"J'ai déjà un compte — Connexion"}</button>
+              </Link>
+            </div>
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-[18px] bg-transparent border-none text-[22px] text-gray-400 cursor-pointer leading-none"
+            >×</button>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════
+          HEADER
+      ════════════════════════════════════════ */}
+      <header className="bg-white sticky top-0 z-[100]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+        <div className="max-w-[1280px] mx-auto px-6 h-[82px] flex items-center justify-between">
+
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3 no-underline">
+            <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+              <rect width="46" height="46" rx="12" fill="#0A2540"/>
+              <rect x="23" y="7" width="13" height="13" rx="2" transform="rotate(45 23 7)" fill="#F7B500" opacity="0.15"/>
+              <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="#F7B500" fontSize="15" fontWeight="900" fontFamily="Arial, sans-serif" letterSpacing="0.5">BEH</text>
+            </svg>
+            <div className="flex flex-col leading-none">
+              <span className="font-black text-[18px] text-[#0A2540] tracking-[-0.4px]">
+                Business <span className="text-[#F7B500]">Expert</span> Hub
+              </span>
+              <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.8px] mt-[3px]">
+                Plateforme Experts &amp; Startups
+              </span>
+            </div>
+          </Link>
+
+          <nav className="flex gap-7 items-center">
+            <Link href="/"         className="nav-link nav-link-active">Accueil</Link>
+            <Link href="/a-propos" className="nav-link">{"À propos"}</Link>
+            <div
+              className="relative"
+              onMouseEnter={() => setServicesOpen(true)}
+              onMouseLeave={() => setServicesOpen(false)}
+            >
+              <Link href="/services" className="nav-link font-semibold">Services ▾</Link>
               {servicesOpen && (
-                <ul className="absolute top-8 left-0 bg-white shadow-lg rounded-lg w-52 text-[#0A2540]">
-                  <li className="p-3 hover:bg-[#F9F2E7] cursor-pointer transition-colors">Consulting</li>
-                  <li className="p-3 hover:bg-[#F9F2E7] cursor-pointer transition-colors">Audit sur site</li>
-                  <li className="p-3 hover:bg-[#F9F2E7] cursor-pointer transition-colors">Accompagnement</li>
-                  <li className="p-3 hover:bg-[#F9F2E7] cursor-pointer transition-colors">Formations</li>
+                <ul
+                  className="absolute top-[calc(100%+8px)] left-0 bg-white rounded-xl list-none p-[6px_0] m-0 z-[200] min-w-[200px]"
+                  style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.12)", border: "1px solid rgba(10,37,64,0.06)" }}
+                >
+                  {navServices.map((s) => (
+                    <li key={s.slug}>
+                      <Link href={`/services/${s.slug}`} className="drop-item">{s.label}</Link>
+                    </li>
+                  ))}
                 </ul>
               )}
-            </li>
-            <li className="hover:text-[#F7B500] cursor-pointer transition-colors">Experts</li>
-            <li className="hover:text-[#F7B500] cursor-pointer transition-colors">Formations</li>
-            <li className="hover:text-[#F7B500] cursor-pointer transition-colors">Blog</li>
-            <li className="hover:text-[#F7B500] cursor-pointer transition-colors">Contact</li>
-          </ul>
-
-          {/* Réseaux sociaux + Connexion / Inscription */}
-          <div className="flex items-center gap-4">
-            <div className="flex gap-3 text-[#0A2540] text-lg">
-              <a href="#" className="hover:text-[#F7B500] transition-colors"><FaFacebookF /></a>
-              <a href="#" className="hover:text-[#F7B500] transition-colors"><FaLinkedinIn /></a>
-              <a href="#" className="hover:text-[#F7B500] transition-colors"><FaInstagram /></a>
             </div>
+            <Link href="/experts" className="nav-link">Experts</Link>
+            <Link href="/blog"    className="nav-link">Blog</Link>
+            <Link href="/contact" className="nav-link">Contact</Link>
+          </nav>
+
+          <div className="flex gap-3">
             <Link href="/connexion">
-              <button className="border border-[#0A2540] text-[#0A2540] px-4 py-2 rounded-lg hover:bg-[#F7B500] hover:text-[#0A2540] transition-colors duration-300">
-                Connexion
-              </button>
+              <button className="btn-conn">Connexion</button>
             </Link>
             <Link href="/inscription">
-              <button className="bg-[#F7B500] text-[#0A2540] px-4 py-2 rounded-lg hover:bg-[#E0A700] hover:text-[#0A2540] transition-colors duration-300">
-                S'inscrire
-              </button>
+              <button className="btn-insc">{"S'inscrire"}</button>
             </Link>
           </div>
         </div>
       </header>
 
-      {/* ================= HERO ================= */}
-      <section className="relative bg-[hsl(210,22%,43%)] text-white py-28 text-center overflow-hidden">
-        {/* Cercles animés */}
-        <div className="absolute top-[-50px] left-[-50px] w-72 h-72 bg-yellow-500 opacity-20 rounded-full animate-pulse-slow blur-3xl"></div>
-        <div className="absolute bottom-[-60px] right-[-60px] w-96 h-96 bg-yellow-500 opacity-15 rounded-full animate-pulse-slow blur-3xl"></div>
-        <div className="absolute top-[30%] left-[70%] w-56 h-56 bg-yellow-400 opacity-10 rounded-full animate-pulse-slow blur-2xl"></div>
+      {/* ════════════════════════════════════════
+          HERO
+      ════════════════════════════════════════ */}
+      <section className="relative bg-[#0A2540] text-white overflow-hidden min-h-[520px] flex items-center">
+        {/* Diamonds */}
+        {[
+          { w: 420, r: 80,  delay: "0s"   },
+          { w: 280, r: 160, delay: "1.2s" },
+          { w: 160, r: 220, delay: "2.4s" },
+        ].map((d, i) => (
+          <div
+            key={i}
+            className="diamond-float absolute pointer-events-none"
+            style={{
+              width: d.w, height: d.w, right: d.r, top: "50%",
+              transform: "translateY(-50%) rotate(45deg)",
+              background: `rgba(255,255,255,${0.05 + i * 0.01})`,
+              border: "1px solid rgba(255,255,255,0.09)",
+              animationDelay: d.delay,
+            }}
+          />
+        ))}
+        <div
+          className="absolute pointer-events-none"
+          style={{ width: 200, height: 200, left: -60, bottom: -60, transform: "rotate(45deg)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+        />
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center">
-            <span className="text-[hsl(0,0%,100%)]">Cabinet de consulting</span>{" "}
-            <span className="text-[#F7B500]">& conseil</span>
+        <div className="relative z-10 max-w-[1280px] mx-auto px-8 py-24">
+          <div className="inline-block mb-6 px-5 py-1.5 rounded-full bg-[#F7B500] text-[#0A2540] font-black text-[12px] tracking-[3px] uppercase">
+            Cabinet de consulting & conseil
+          </div>
+          <h1 className="font-black m-0 mb-6 leading-[1.1]" style={{ fontSize: "clamp(42px,5.5vw,72px)" }}>
+            Propulsez votre <span className="text-[#F7B500]">startup</span><br />vers l&apos;excellence
           </h1>
-          <p className="text-2xl mb-8">Faites passer votre startup au niveau supérieur grâce à notre expertise dédiée.</p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <button className="bg-[#F7B500] text-[#0A2540] px-6 py-3 rounded-lg font-semibold 
-                               hover:bg-[#E0A700] hover:scale-105 transform transition-all duration-500 animate-bounce-slow">
-              Découvrir nos services →
-            </button>
+          <p className="text-[17px] text-white/85 max-w-[580px] leading-[1.8] mb-10">
+            Plateforme experts spécialisé dans l&apos;accompagnement stratégique des startups et entreprises en croissance.
+            Nous proposons des services d&apos;expertise, de formations et de suivi personnalisé afin d&apos;optimiser la performance et soutenir le développement durable.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/services" className="btn-gold">Découvrir nos services →</Link>
+            <Link href="/contact"  className="btn-outline">Contactez-nous →</Link>
           </div>
         </div>
       </section>
 
-      {/* ================= Notre ADN ================= */}
-      <section className="py-24 bg-gradient-to-r from-[#E6F0FA] to-[#ffffff]">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-2 text-[#0A2540]">Notre ADN</h2>
-        <p className="text-center text-lg text-gray-600 mb-12">Ce qui nous guide au quotidien</p>
+      {/* ════════════════════════════════════════
+          ADN
+      ════════════════════════════════════════ */}
+      <section
+        className="py-24 px-6 overflow-hidden relative"
+        style={{ background: "linear-gradient(160deg,#f0f6ff 0%,#ffffff 60%,#fefaf0 100%)" }}
+      >
+        <div
+          className="absolute pointer-events-none rounded-full"
+          style={{ top: -80, right: -80, width: 400, height: 400, background: "radial-gradient(circle,rgba(247,181,0,0.09) 0%,transparent 70%)" }}
+        />
 
-        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-10 text-center px-4">
-          {adnCards.map((card, idx) => (
-            <div key={idx} className="relative bg-white p-8 rounded-2xl shadow-lg overflow-hidden transform transition-all duration-700 opacity-0 animate-fadeInUp" style={{ animationDelay: `${idx * 0.3}s` }}>
-              {card.icon}
-              <div className="w-16 h-1 bg-[#F7B500] mx-auto rounded-full mb-4"></div>
-              <h3 className="text-2xl font-semibold mb-4 text-[#0A2540]">{card.title}</h3>
-              <p className="text-gray-600 mb-6">{card.desc}</p>
-              <button className="mt-2 bg-[#0A2540] text-white px-5 py-2 rounded-lg hover:bg-[#F7B500] hover:text-[#0A2540] transition-colors duration-300">
-                Découvrir
-              </button>
+        <FadeUp className="text-center mb-16">
+          <span className="inline-block bg-[#F7B500] text-[#0A2540] font-black text-[12px] tracking-[3px] uppercase px-[18px] py-1.5 rounded-full mb-5">
+            Qui sommes-nous
+          </span>
+          <h2 className="font-black text-[#0A2540] m-0 mb-3.5 leading-[1.15]" style={{ fontSize: "clamp(30px,4vw,50px)" }}>
+            Notre <span className="text-[#F7B500]">ADN</span>
+          </h2>
+          <p className="text-gray-500 text-[17px] max-w-[480px] mx-auto">
+            Les trois piliers qui guident chacune de nos actions au quotidien
+          </p>
+        </FadeUp>
+
+        <div className="max-w-[1200px] mx-auto grid grid-cols-3 gap-8">
+          {adnCards.map((card, i) => (
+            <FadeUp key={i} delay={i * 0.18}>
+              <div
+                className="card-adn bg-white rounded-[22px] relative overflow-hidden"
+                style={{ padding: "44px 36px", boxShadow: "0 6px 32px rgba(10,37,64,0.08)", border: "1px solid rgba(10,37,64,0.06)", transition: "transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s ease" }}
+              >
+                <div className="absolute top-4 right-6 text-[72px] font-black leading-none select-none text-[#0A2540]/[0.04]">
+                  {card.num}
+                </div>
+                <div
+                  className="w-[66px] h-[66px] rounded-[18px] flex items-center justify-center text-[28px] text-[#F7B500] mb-[26px]"
+                  style={{ background: "linear-gradient(135deg,#0A2540,#1a4080)", boxShadow: "0 8px 22px rgba(10,37,64,0.22)" }}
+                >
+                  {card.icon}
+                </div>
+                <h3 className="text-[23px] font-black text-[#0A2540] mb-3.5">{card.title}</h3>
+                <p className="text-gray-500 leading-[1.8] mb-[30px] text-[15px]">{card.desc}</p>
+                <button className="btn-navy">Découvrir</button>
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-[3px]"
+                  style={{ background: "linear-gradient(90deg,#F7B500,transparent)" }}
+                />
+              </div>
+            </FadeUp>
+          ))}
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          EXPERTS
+      ════════════════════════════════════════ */}
+      <section className="py-24 px-6 bg-[#0A2540] relative overflow-hidden">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.025) 1px,transparent 1px)", backgroundSize: "40px 40px" }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle,rgba(247,181,0,0.06) 0%,transparent 65%)" }}
+        />
+
+        <div className="max-w-[1200px] mx-auto relative z-10">
+          <FadeUp className="text-center mb-16">
+            <span
+              className="inline-block text-[#F7B500] font-bold text-[12px] tracking-[3px] uppercase px-[18px] py-1.5 rounded-full mb-5"
+              style={{ border: "1px solid rgba(247,181,0,0.35)" }}
+            >
+              Notre équipe
+            </span>
+            <h2 className="font-black text-white m-0 mb-3.5 leading-[1.15]" style={{ fontSize: "clamp(30px,4vw,50px)" }}>
+              Nos <span className="text-[#F7B500]">Experts</span> certifiés
+            </h2>
+            <p className="text-white/50 text-[17px] max-w-[480px] mx-auto">
+              Des professionnels triés sur le volet pour vous accompagner
+            </p>
+          </FadeUp>
+
+          <div className="grid grid-cols-4 gap-6">
+            {experts.map((ex, i) => (
+              <FadeUp key={i} delay={i * 0.12}>
+                <div
+                  className="expert-card bg-white rounded-[20px] overflow-hidden flex flex-col"
+                  style={{ border: "1.5px solid rgba(255,255,255,0.1)", transition: "all 0.35s cubic-bezier(.22,1,.36,1)" }}
+                >
+                  <div className="h-[5px]" style={{ background: "linear-gradient(90deg,#F7B500,#e6a800)" }} />
+                  <div className="pt-7 px-6 pb-5 text-center flex-1">
+                    <div
+                      className="w-[76px] h-[76px] rounded-full flex items-center justify-center text-2xl font-black text-[#F7B500] mx-auto mb-4"
+                      style={{ background: "linear-gradient(135deg,#0A2540,#1a4080)", border: "3px solid rgba(247,181,0,0.3)" }}
+                    >
+                      {ex.initials}
+                    </div>
+                    <h3 className="text-[17px] font-black text-[#0A2540] mb-1.5 leading-snug">{ex.name}</h3>
+                    <p className="text-[13px] text-gray-500 font-semibold mb-4 leading-snug">{ex.role}</p>
+                    <div className="flex flex-wrap gap-1.5 justify-center">
+                      {ex.tags.slice(0, 2).map((t, j) => (
+                        <span
+                          key={j}
+                          className="text-[11px] font-bold px-2.5 py-[3px] rounded-full text-[#0A2540]"
+                          style={{ background: "rgba(10,37,64,0.07)" }}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="px-5 pb-[22px]">
+                    <button
+                      className="expert-btn w-full border-none rounded-[10px] py-[11px] px-4 font-bold text-[14px] cursor-pointer flex items-center justify-center gap-2 transition-all duration-300 text-white"
+                      style={{ background: "#0A2540", fontFamily: "inherit" }}
+                      onClick={() => setShowModal(true)}
+                    >
+                      Voir le profil <FaArrowRight size={12} />
+                    </button>
+                  </div>
+                </div>
+              </FadeUp>
+            ))}
+          </div>
+
+          <FadeUp delay={0.45} className="text-center mt-[52px]">
+            <Link href="/experts" className="btn-gold">Voir tous nos experts →</Link>
+          </FadeUp>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          PARTENAIRES
+      ════════════════════════════════════════ */}
+      <section className="py-20 px-6 bg-[#081B33] overflow-hidden">
+        <div className="max-w-[1200px] mx-auto">
+          <FadeUp className="text-center mb-14">
+            <span
+              className="inline-block text-[#F7B500] font-bold text-[12px] tracking-[3px] uppercase px-[18px] py-1.5 rounded-full mb-5"
+              style={{ border: "1px solid rgba(247,181,0,0.3)" }}
+            >
+              Ils nous font confiance
+            </span>
+            <h2 className="font-black text-white m-0 leading-[1.15]" style={{ fontSize: "clamp(28px,3.5vw,44px)" }}>
+              Nos <span className="text-[#F7B500]">Partenaires</span>
+            </h2>
+          </FadeUp>
+
+          <div className="relative overflow-hidden">
+            <div
+              className="absolute left-0 top-0 bottom-0 w-[100px] z-20 pointer-events-none"
+              style={{ background: "linear-gradient(90deg,#081B33,transparent)" }}
+            />
+            <div
+              className="absolute right-0 top-0 bottom-0 w-[100px] z-20 pointer-events-none"
+              style={{ background: "linear-gradient(-90deg,#081B33,transparent)" }}
+            />
+            <div className="marquee-track">
+              {[...partners, ...partners].map((p, i) => (
+                <div
+                  key={i}
+                  className="card-partner flex-shrink-0 min-w-[200px] rounded-[14px] p-[26px_28px] text-center"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", transition: "all 0.3s ease" }}
+                >
+                  <div
+                    className="w-[46px] h-[46px] rounded-[10px] flex items-center justify-center mx-auto mb-3 text-[#F7B500] font-black text-[14px]"
+                    style={{ background: "linear-gradient(135deg,#0A2540,#1d4e89)", border: "1px solid rgba(247,181,0,0.2)" }}
+                  >
+                    {p.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="text-white font-bold text-[14px]">{p.name}</div>
+                  <div className="text-white/40 text-[12px] mt-1">{p.sector}</div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
-
-        <style jsx>{`
-          @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(40px); }
-            100% { opacity: 1; transform: translateY(0); }
-          }
-          .animate-fadeInUp { animation: fadeInUp 0.7s ease forwards; }
-        `}</style>
       </section>
 
-      {/* ================= Experts ================= */}
-      <section className="py-20 bg-[#F9FAFB]">
-        <h2 className="text-3xl font-bold text-center mb-12 text-[#0A2540]">Nos Experts</h2>
-        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8 px-4">
-          {experts.map((exp, idx) => (
-            <div key={idx} className="bg-white p-6 shadow rounded-lg text-center hover:scale-105 transition-transform">
-              <h3 className="font-semibold text-lg text-[#0A2540]">{exp.name}</h3>
-              <p className="text-gray-600">{exp.role}</p>
-              <button className="mt-4 bg-[#F7B500] text-[#0A2540] px-4 py-2 rounded-lg hover:bg-[#E0A700] transition-colors duration-300">
-                Découvrir
-              </button>
+      {/* ════════════════════════════════════════
+          TÉMOIGNAGES
+      ════════════════════════════════════════ */}
+      <section
+        className="py-24 px-6 relative overflow-hidden"
+        style={{ background: "linear-gradient(160deg,#f0f6ff 0%,#ffffff 100%)" }}
+      >
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-[4px]"
+          style={{ background: "linear-gradient(90deg,transparent,#F7B500 40%,#F7B500 60%,transparent)" }}
+        />
+
+        <div className="max-w-[860px] mx-auto">
+          <FadeUp className="text-center mb-16">
+            <span className="inline-block bg-[#F7B500] text-[#0A2540] font-black text-[12px] tracking-[3px] uppercase px-[18px] py-1.5 rounded-full mb-5">
+              Ils témoignent
+            </span>
+            <h2 className="font-black text-[#0A2540] m-0 mb-3.5 leading-[1.15]" style={{ fontSize: "clamp(30px,4vw,50px)" }}>
+              Ce que disent nos <span className="text-[#F7B500]">clients</span>
+            </h2>
+          </FadeUp>
+
+          <FadeUp delay={0.15} className="relative">
+            <div
+              className="bg-white rounded-3xl relative"
+              style={{
+                padding: "56px 64px",
+                boxShadow: "0 8px 50px rgba(10,37,64,0.10)",
+                border: "1px solid rgba(10,37,64,0.06)",
+                opacity: animating ? 0 : 1,
+                transform: animating ? "scale(0.97)" : "scale(1)",
+                transition: "opacity 0.28s ease, transform 0.28s ease",
+              }}
+            >
+              <FaQuoteLeft className="absolute top-8 left-12 text-[36px]" style={{ color: "rgba(247,181,0,0.22)" }} />
+              <div className="flex gap-1.5 justify-center mb-[26px]">
+                {Array.from({ length: testimonials[active].rating }).map((_, i) => (
+                  <FaStar key={i} className="text-[#F7B500] text-[18px]" />
+                ))}
+              </div>
+              <p
+                className="text-gray-700 leading-[1.8] text-center italic mb-9"
+                style={{ fontSize: "clamp(16px,2vw,21px)" }}
+              >
+                &ldquo;{testimonials[active].quote}&rdquo;
+              </p>
+              <div className="text-center">
+                <div
+                  className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-[#F7B500] font-black text-[16px] mx-auto mb-3"
+                  style={{ background: "linear-gradient(135deg,#0A2540,#1a4080)" }}
+                >
+                  {testimonials[active].author.split(" ").map((w) => w[0]).join("")}
+                </div>
+                <div className="font-black text-[#0A2540] text-[16px]">{testimonials[active].author}</div>
+                <div className="text-[#F7B500] text-[14px] font-semibold mt-0.5">{testimonials[active].role}</div>
+              </div>
             </div>
-          ))}
+
+            <button
+              className="arrow-btn"
+              style={{ left: -24 }}
+              onClick={() => goTo((active - 1 + testimonials.length) % testimonials.length)}
+            >
+              <FaChevronLeft />
+            </button>
+            <button
+              className="arrow-btn"
+              style={{ right: -24 }}
+              onClick={() => goTo((active + 1) % testimonials.length)}
+            >
+              <FaChevronRight />
+            </button>
+          </FadeUp>
+
+          <div className="flex justify-center gap-2.5 mt-9">
+            {testimonials.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                className="h-[10px] rounded-full border-none cursor-pointer p-0 transition-all duration-300"
+                style={{
+                  width: i === active ? 30 : 10,
+                  background: i === active ? "#F7B500" : "rgba(10,37,64,0.18)",
+                }}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ================= Témoignages ================= */}
-      <section className="py-20 bg-white">
-        <h2 className="text-3xl font-bold text-center mb-12 text-[#0A2540]">Témoignages</h2>
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 text-center px-4">
-          {testimonials.map((t, idx) => (
-            <div key={idx} className="shadow-lg p-6 rounded-lg">
-              <p>"{t.text}"</p>
-              <p className="mt-2 font-semibold text-[#0A2540]">- {t.author}</p>
+      {/* ════════════════════════════════════════
+          NEWSLETTER
+      ════════════════════════════════════════ */}
+      <section className="py-[90px] px-6 bg-[#0A2540] relative overflow-hidden">
+        <div
+          className="absolute pointer-events-none rounded-full"
+          style={{ top: -120, right: -120, width: 500, height: 500, background: "radial-gradient(circle,rgba(247,181,0,0.07) 0%,transparent 70%)" }}
+        />
+        <div
+          className="absolute pointer-events-none rounded-full"
+          style={{ bottom: -80, left: -80, width: 350, height: 350, background: "radial-gradient(circle,rgba(247,181,0,0.05) 0%,transparent 70%)" }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.02) 1px,transparent 1px)", backgroundSize: "32px 32px" }}
+        />
+
+        <div className="max-w-[620px] mx-auto relative z-10">
+          <FadeUp className="text-center">
+            <div
+              className="w-16 h-16 rounded-[18px] flex items-center justify-center mx-auto mb-7 text-[26px] text-[#0A2540]"
+              style={{ background: "linear-gradient(135deg,#F7B500,#e6a800)", boxShadow: "0 10px 28px rgba(247,181,0,0.3)" }}
+            >
+              <FaEnvelope />
             </div>
-          ))}
+            <span
+              className="inline-block text-[#F7B500] font-bold text-[12px] tracking-[3px] uppercase px-[18px] py-1.5 rounded-full mb-[22px]"
+              style={{ border: "1px solid rgba(247,181,0,0.35)" }}
+            >
+              Newsletter
+            </span>
+            <h2 className="font-black text-white m-0 mb-3.5 leading-[1.15]" style={{ fontSize: "clamp(28px,4vw,46px)" }}>
+              Restez <span className="text-[#F7B500]">informé</span>
+            </h2>
+            <p className="text-white/50 text-[16px] mb-10 leading-[1.7]">
+              Recevez nos dernières actualités, conseils et ressources pour accélérer la croissance de votre startup.
+            </p>
+
+            {submitted ? (
+              <div
+                className="rounded-2xl py-7 px-8 text-[#4ade80] text-[18px] font-bold"
+                style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.35)" }}
+              >
+                ✅ Merci ! Vous êtes bien inscrit à notre newsletter.
+              </div>
+            ) : (
+              <form onSubmit={handleNewsletter} className="flex gap-3 max-w-[500px] mx-auto">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Votre adresse email..."
+                  required
+                  className="newsletter-input"
+                />
+                <button type="submit" className="btn-gold">{"S'inscrire →"}</button>
+              </form>
+            )}
+            <p className="text-white/[0.28] text-[12px] mt-4">Pas de spam. Désabonnement en un clic. 🔒</p>
+          </FadeUp>
         </div>
       </section>
 
-      {/* ================= Partenaires ================= */}
-      <section className="py-20 bg-[#F9FAFB]">
-        <h2 className="text-3xl font-bold text-center mb-12 text-[#0A2540]">Partenaires</h2>
-        <div className="max-w-7xl mx-auto flex justify-center flex-wrap gap-8 items-center">
-          {[1,2,3,4].map((i) => (
-            <img key={i} src={`https://via.placeholder.com/150x50?text=Partner+${i}`} alt={`Partenaire ${i}`} className="h-12"/>
-          ))}
-        </div>
-      </section>
-
-      {/* ================= FOOTER ================= */}
-      <footer className="bg-[#081B33] text-white py-10 text-center">
-        <p className="mb-3">© 2026 StartUp Connect</p>
-        <p className="text-gray-300">Cabinet de consulting et conseil pour startups</p>
+      {/* ════════════════════════════════════════
+          FOOTER
+      ════════════════════════════════════════ */}
+      <footer className="bg-[#081B33] text-white py-10 px-6 text-center">
+        <p className="m-0 mb-2 text-[15px] font-semibold">© 2026 Business Expert Hub</p>
+        <p className="text-white/40 text-[13px] m-0">Plateforme de mise en relation startups & experts</p>
       </footer>
-
     </div>
   );
 }
