@@ -401,16 +401,14 @@ export default function ExpertsPage() {
             <span className="text-[#F7B500] font-semibold">Nos Experts</span>
           </div>
 
-          <div className="grid gap-16" style={{ gridTemplateColumns: "1fr 420px" }}>
-            {/* Texte */}
-            <div>
+          <div className="max-w-[680px]">
               <span className="inline-block bg-[#F7B500] text-[#0A2540] font-black text-[12px] tracking-[3px] uppercase px-[18px] py-1.5 rounded-full mb-5">
                 Experts certifiés
               </span>
               <h1 className="font-black m-0 mb-5 leading-[1.1]" style={{ fontSize: "clamp(40px,5vw,64px)" }}>
                 Nos <span className="text-[#F7B500]">Experts</span>
               </h1>
-              <p className="text-[17px] text-white/75 leading-[1.8] mb-10 max-w-[520px]">
+              <p className="text-[17px] text-white/75 leading-[1.8] mb-10">
                 Des professionnels certifiés pour vous accompagner dans chaque domaine. Trouvez l&apos;expert idéal pour votre startup et accélérez votre croissance.
               </p>
 
@@ -423,53 +421,6 @@ export default function ExpertsPage() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Carte expert mise en avant */}
-            <div className="hidden lg:flex items-center">
-              <div className="w-full bg-white/[0.07] backdrop-blur-sm rounded-3xl p-7 border border-white/10"
-                style={{ boxShadow:"0 20px 60px rgba(0,0,0,0.2)" }}>
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-3 h-3 rounded-full bg-green-400 flex-shrink-0 ping-dot" />
-                  <span className="text-green-400 text-[12px] font-bold uppercase tracking-[2px]">Expert disponible</span>
-                </div>
-                <div className="flex items-start gap-4 mb-5">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-[20px] flex-shrink-0"
-                    style={{ background: "linear-gradient(135deg,#0A2540,#1a4080)", color: "#3B82F6", border:"2px solid rgba(59,130,246,0.3)" }}>
-                    SM
-                  </div>
-                  <div>
-                    <div className="font-black text-white text-[17px] leading-snug">Sofia Mansouri</div>
-                    <div className="text-white/60 text-[13px] mt-0.5">Expert Finance & Levée de fonds</div>
-                    <div className="flex items-center gap-1.5 mt-2">
-                      {[...Array(5)].map((_, i) => <FaStar key={i} className="text-[#F7B500] text-[11px]" />)}
-                      <span className="text-white/60 text-[12px] ml-1">5.0 (61 avis)</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2 mb-5">
-                  {["Venture Capital","M&A","CFO as a Service"].map(t => (
-                    <span key={t} className="text-[11px] font-bold px-2.5 py-1 rounded-full text-white/80"
-                      style={{ background:"rgba(255,255,255,0.1)" }}>{t}</span>
-                  ))}
-                </div>
-                <div className="grid grid-cols-3 gap-3 mb-5">
-                  {[["67","Missions"],["12 ans","Expérience"],["61","Avis"]].map(([v,l]) => (
-                    <div key={l} className="bg-white/[0.06] rounded-xl p-3 text-center">
-                      <div className="font-black text-white text-[16px]">{v}</div>
-                      <div className="text-white/40 text-[11px] mt-0.5">{l}</div>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() => openModal(EXPERTS[0])}
-                  className="w-full bg-[#F7B500] text-[#0A2540] border-none rounded-xl py-3 font-black text-[14px] cursor-pointer flex items-center justify-center gap-2 transition-all duration-200 hover:bg-[#e6a800] hover:-translate-y-0.5"
-                  style={{ fontFamily:"inherit" }}
-                >
-                  Voir le profil complet <FaArrowRight size={12} />
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </section>
