@@ -1,11 +1,12 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   FaStar, FaArrowRight, FaSearch,
-  FaChartLine, FaBriefcase, FaCode, FaUsers,
+  FaChartLine, FaCode, FaUsers,
   FaLightbulb, FaThLarge, FaLock, FaEnvelope,
-  FaCalendarAlt, FaCheckCircle, FaBullhorn,
+  FaCalendarAlt, FaBullhorn,
 } from "react-icons/fa";
 
 /* ══════════════════════════════════════
@@ -147,10 +148,10 @@ const DOMAINS: { label: string; value: Domain; icon: React.ReactNode; color: str
 ];
 
 const STATS = [
-  { value: "80+",  label: "Experts certifiés"       },
-  { value: "4.9★", label: "Note moyenne"             },
-  { value: "500+", label: "Missions réalisées"       },
-  { value: "48h",  label: "Mise en relation garantie"},
+  { value: "80+",  label: "Experts certifiés"        },
+  { value: "4.9★", label: "Note moyenne"              },
+  { value: "500+", label: "Missions réalisées"        },
+  { value: "48h",  label: "Mise en relation garantie" },
 ];
 
 const navServices = [
@@ -158,7 +159,6 @@ const navServices = [
   { label: "Audit sur site", slug: "audit-sur-site" },
   { label: "Accompagnement", slug: "accompagnement" },
   { label: "Formations",     slug: "formations"     },
-  { label: "Podcasts",       slug: "podcasts"       },
 ];
 
 /* ══════════════════════════════════════
@@ -194,10 +194,26 @@ export default function ExpertsPage() {
         *, *::before, *::after { box-sizing: border-box; }
         body { margin: 0; }
 
-        @keyframes floatY {
-          0%,100% { transform: translateY(-50%) rotate(45deg); }
-          50%      { transform: translateY(calc(-50% - 14px)) rotate(45deg); }
+        /* ── Hero bg zoom ── */
+        @keyframes heroExpertZoom {
+          0%   { transform: scale(1.08); }
+          100% { transform: scale(1); }
         }
+        .hero-expert-bg {
+          animation: heroExpertZoom 2s cubic-bezier(.22,1,.36,1) forwards;
+        }
+
+        /* ── Hero content staggered fade-in ── */
+        @keyframes heroFadeIn {
+          from { opacity: 0; transform: translateY(28px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .hci { animation: heroFadeIn 0.85s cubic-bezier(.22,1,.36,1) both; }
+        .hci-1 { animation-delay: 0.15s; }
+        .hci-2 { animation-delay: 0.28s; }
+        .hci-3 { animation-delay: 0.42s; }
+        .hci-4 { animation-delay: 0.58s; }
+
         @keyframes fadeIn {
           from { opacity:0; transform:translateY(-8px); }
           to   { opacity:1; transform:translateY(0); }
@@ -215,11 +231,9 @@ export default function ExpertsPage() {
           100% { transform:scale(1.9); opacity:0; }
         }
 
-        .diamond-float { animation: floatY 7s ease-in-out infinite; }
-        .modal-box     { animation: modalIn .32s cubic-bezier(.22,1,.36,1); }
-        .card-appear   { animation: cardIn .45s cubic-bezier(.22,1,.36,1) both; }
+        .modal-box   { animation: modalIn .32s cubic-bezier(.22,1,.36,1); }
+        .card-appear { animation: cardIn .45s cubic-bezier(.22,1,.36,1) both; }
 
-        /* ── Header nav ── */
         .nav-link { color:#0A2540; text-decoration:none; font-size:15px; font-weight:500; transition:color .2s; }
         .nav-link:hover { color:#F7B500; }
         .drop-item { display:block; padding:10px 16px; color:#0A2540; text-decoration:none; font-size:14px; font-weight:600; transition:background .15s; white-space:nowrap; }
@@ -229,22 +243,18 @@ export default function ExpertsPage() {
         .btn-insc { background:#F7B500; color:#0A2540; border:2px solid #F7B500; padding:9px 22px; border-radius:9px; font-weight:800; font-size:14px; cursor:pointer; transition:all .22s; font-family:inherit; }
         .btn-insc:hover { background:#e6a800; transform:translateY(-2px); box-shadow:0 8px 22px rgba(247,181,0,0.38); }
 
-        /* ── Domain pills ── */
         .domain-pill { display:flex; align-items:center; gap:7px; padding:10px 20px; border-radius:99px; font-size:13.5px; font-weight:700; cursor:pointer; border:2px solid rgba(10,37,64,0.10); background:white; color:#374151; transition:all .22s ease; white-space:nowrap; box-shadow:0 2px 8px rgba(10,37,64,0.05); }
         .domain-pill:hover { border-color:#F7B500; color:#0A2540; background:#FFFBEB; transform:translateY(-2px); box-shadow:0 6px 16px rgba(247,181,0,0.18); }
         .domain-pill.active { background:#0A2540; color:#F7B500; border-color:#0A2540; box-shadow:0 6px 18px rgba(10,37,64,0.25); transform:translateY(-2px); }
 
-        /* ── Expert card ── */
         .expert-card { background:white; border-radius:22px; border:1.5px solid rgba(10,37,64,0.07); box-shadow:0 4px 22px rgba(10,37,64,0.07); overflow:hidden; transition:transform .32s cubic-bezier(.22,1,.36,1), box-shadow .32s ease, border-color .32s ease; display:flex; flex-direction:column; }
         .expert-card:hover { transform:translateY(-10px); box-shadow:0 24px 56px rgba(10,37,64,0.14); border-color:rgba(247,181,0,0.4); }
         .expert-card:hover .cta-btn { background:#F7B500 !important; color:#0A2540 !important; }
 
-        /* ── Search ── */
         .search-box { width:100%; background:white; border:1.5px solid rgba(10,37,64,0.10); border-radius:14px; padding:13px 16px 13px 48px; font-size:15px; color:#0A2540; outline:none; transition:border-color .22s, box-shadow .22s; font-family:'Plus Jakarta Sans',sans-serif; box-shadow:0 2px 10px rgba(10,37,64,0.05); }
         .search-box::placeholder { color:#9CA3AF; }
         .search-box:focus { border-color:#F7B500; box-shadow:0 0 0 4px rgba(247,181,0,0.12); }
 
-        /* ── Ping animation for availability dot ── */
         .ping-dot { position:relative; }
         .ping-dot::after { content:''; position:absolute; inset:-3px; border-radius:50%; border:2px solid #22C55E; animation:ping 1.8s ease-out infinite; }
       `}</style>
@@ -263,7 +273,6 @@ export default function ExpertsPage() {
             style={{ padding: "52px 44px", boxShadow: "0 32px 80px rgba(10,37,64,0.28)" }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Icône cadenas */}
             <div
               className="w-[68px] h-[68px] rounded-full flex items-center justify-center text-[28px] text-[#0A2540] mx-auto mb-6"
               style={{ background: "linear-gradient(135deg,#F7B500,#e6a800)", boxShadow: "0 10px 28px rgba(247,181,0,0.35)" }}
@@ -271,7 +280,6 @@ export default function ExpertsPage() {
               <FaLock />
             </div>
 
-            {/* Mini profil */}
             {selectedExpert && (
               <div className="flex items-center gap-3 bg-[#f7f9fc] rounded-2xl p-4 mb-6">
                 <div
@@ -322,10 +330,7 @@ export default function ExpertsPage() {
       {/* ══════════════════════════════
           HEADER
       ══════════════════════════════ */}
-      <header
-        className="bg-white sticky top-0 z-[100]"
-        style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}
-      >
+      <header className="bg-white sticky top-0 z-[100]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
         <div className="max-w-[1280px] mx-auto px-6 h-[76px] flex items-center justify-between">
 
           <Link href="/" className="flex items-center gap-3 no-underline">
@@ -334,93 +339,105 @@ export default function ExpertsPage() {
               <rect x="23" y="7" width="13" height="13" rx="2" transform="rotate(45 23 7)" fill="#F7B500" opacity="0.15"/>
               <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="#F7B500" fontSize="15" fontWeight="900" fontFamily="Arial" letterSpacing="0.5">BEH</text>
             </svg>
-            <div>
-              <div className="font-black text-[18px] text-[#0A2540] leading-none tracking-[-0.4px]">
-                Business <span className="text-[#F7B500]">Expert</span> Hub
-              </div>
-              <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.8px] mt-[3px]">
-                Plateforme Experts &amp; Startups
-              </div>
+            <div className="font-black text-[18px] text-[#0A2540] leading-none tracking-[-0.4px]">
+              Business <span className="text-[#F7B500]">Expert</span> Hub
             </div>
           </Link>
 
           <nav className="flex gap-7 items-center">
-            <Link href="/"          className="nav-link">Accueil</Link>
-            <Link href="/a-propos"  className="nav-link">À propos</Link>
+            <Link href="/"         className="nav-link">Accueil</Link>
+            <Link href="/a-propos" className="nav-link">À propos</Link>
             <div className="relative" onMouseEnter={() => setServicesOpen(true)} onMouseLeave={() => setServicesOpen(false)}>
               <Link href="/services" className="nav-link font-semibold">Services ▾</Link>
               {servicesOpen && (
-                <ul className="absolute top-[calc(100%+8px)] left-0 bg-white rounded-xl list-none p-[6px_0] m-0 z-[200] min-w-[200px]"
-                  style={{ boxShadow:"0 8px 32px rgba(0,0,0,0.12)", border:"1px solid rgba(10,37,64,0.06)", animation:"fadeIn .2s ease" }}>
+                <ul
+                  className="absolute top-[calc(100%+8px)] left-0 bg-white rounded-xl list-none p-[6px_0] m-0 z-[200] min-w-[200px]"
+                  style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.12)", border: "1px solid rgba(10,37,64,0.06)", animation: "fadeIn .2s ease" }}
+                >
                   {navServices.map(s => (
                     <li key={s.slug}><Link href={`/services/${s.slug}`} className="drop-item">{s.label}</Link></li>
                   ))}
                 </ul>
               )}
             </div>
-            <Link href="/experts" style={{ color:"#F7B500", fontWeight:700 }} className="nav-link">Experts</Link>
+            <Link href="/experts" style={{ color: "#F7B500", fontWeight: 700 }} className="nav-link">Experts</Link>
             <Link href="/blog"    className="nav-link">Blog</Link>
             <Link href="/contact" className="nav-link">Contact</Link>
           </nav>
 
           <div className="flex gap-3">
-            <Link href="/connexion">  <button className="btn-conn">Connexion</button>  </Link>
+            <Link href="/connexion">  <button className="btn-conn">Connexion</button>    </Link>
             <Link href="/inscription"><button className="btn-insc">{"S'inscrire"}</button></Link>
           </div>
         </div>
       </header>
 
       {/* ══════════════════════════════
-          HERO
+          HERO — expert.png en arrière-plan
       ══════════════════════════════ */}
-      <section
-        className="relative overflow-hidden text-white"
-        style={{ background: "linear-gradient(135deg,#0A2540 0%,#0d3060 55%,#081B33 100%)", padding: "88px 24px 110px" }}
-      >
-        {/* Losanges flottants */}
-        {[
-          { w: 380, right: -60,  top: "50%", delay: "0s"   },
-          { w: 220, right: 90,   top: "50%", delay: "1.5s" },
-          { w: 120, right: 140,  top: "50%", delay: "0.8s" },
-        ].map((d, i) => (
-          <div key={i} className="diamond-float absolute pointer-events-none"
-            style={{ width:d.w, height:d.w, right:d.right, top:d.top, transform:"translateY(-50%) rotate(45deg)", background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", animationDelay:d.delay }} />
-        ))}
-        <div className="absolute bottom-[-60px] left-[-60px] pointer-events-none"
-          style={{ width:240, height:240, transform:"rotate(45deg)", background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)" }} />
-        {/* Lueur centrale */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
-          style={{ background:"radial-gradient(circle,rgba(247,181,0,0.07) 0%,transparent 65%)" }} />
+      <section className="relative overflow-hidden text-white" style={{ minHeight: 520 }}>
 
-        <div className="max-w-[1280px] mx-auto relative z-10">
+        {/* Image de fond */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/ex1.jpg"
+            alt="Experts background"
+            fill
+            priority
+            className="hero-expert-bg"
+            style={{ objectFit: "cover", objectPosition: "center top" }}
+            sizes="100vw"
+          />
+          {/* Overlay dégradé : très opaque à gauche → transparent à droite */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(100deg, rgba(10,37,64,0.95) 0%, rgba(10,37,64,0.82) 40%, rgba(10,37,64,0.50) 70%, rgba(10,37,64,0.20) 100%)",
+            }}
+          />
+          {/* Grain subtil */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: "radial-gradient(rgba(255,255,255,0.018) 1px,transparent 1px)",
+              backgroundSize: "44px 44px",
+            }}
+          />
+          {/* Lueur dorée */}
+          <div
+            className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle,rgba(247,181,0,0.07) 0%,transparent 65%)" }}
+          />
+        </div>
+
+        {/* Contenu */}
+        <div className="max-w-[1280px] mx-auto px-6 relative z-10" style={{ padding: "88px 24px 110px" }}>
 
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 mb-6 text-[13px] text-white/50">
+          <div className="hci hci-1 flex items-center gap-2 mb-6 text-[13px] text-white/50">
             <Link href="/" className="text-white/50 no-underline hover:text-[#F7B500] transition-colors">Accueil</Link>
             <span>›</span>
             <span className="text-[#F7B500] font-semibold">Nos Experts</span>
           </div>
 
           <div className="max-w-[680px]">
+            <div className="hci hci-2">
               <span className="inline-block bg-[#F7B500] text-[#0A2540] font-black text-[12px] tracking-[3px] uppercase px-[18px] py-1.5 rounded-full mb-5">
                 Experts certifiés
               </span>
-              <h1 className="font-black m-0 mb-5 leading-[1.1]" style={{ fontSize: "clamp(40px,5vw,64px)" }}>
-                Nos <span className="text-[#F7B500]">Experts</span>
-              </h1>
-              <p className="text-[17px] text-white/75 leading-[1.8] mb-10">
-                Des professionnels certifiés pour vous accompagner dans chaque domaine. Trouvez l&apos;expert idéal pour votre startup et accélérez votre croissance.
-              </p>
+            </div>
 
-              {/* Stats */}
-              <div className="flex gap-10 flex-wrap">
-                {STATS.map(s => (
-                  <div key={s.label}>
-                    <div className="text-[30px] font-black text-[#F7B500] leading-none">{s.value}</div>
-                    <div className="text-[13px] text-white/50 mt-1">{s.label}</div>
-                  </div>
-                ))}
-              </div>
+            <h1
+              className="hci hci-3 font-black m-0 mb-5 leading-[1.1]"
+              style={{ fontSize: "clamp(40px,5vw,64px)", textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
+            >
+              Nos <span className="text-[#F7B500]">Experts</span>
+            </h1>
+
+            <p className="hci hci-3 text-[17px] text-white/80 leading-[1.8]">
+              Des professionnels certifiés pour vous accompagner dans chaque domaine. Trouvez l&apos;expert idéal pour votre startup et accélérez votre croissance.
+            </p>
           </div>
         </div>
       </section>
@@ -428,13 +445,13 @@ export default function ExpertsPage() {
       {/* ══════════════════════════════
           FILTRES + SEARCH
       ══════════════════════════════ */}
-      <section className="bg-white border-b border-[#0A2540]/[0.07] sticky top-[76px] z-50"
-        style={{ boxShadow:"0 4px 20px rgba(10,37,64,0.06)" }}>
+      <section
+        className="bg-white border-b border-[#0A2540]/[0.07] sticky top-[76px] z-50"
+        style={{ boxShadow: "0 4px 20px rgba(10,37,64,0.06)" }}
+      >
         <div className="max-w-[1280px] mx-auto px-6 py-5">
-
           <div className="flex items-center gap-5 flex-wrap">
 
-            {/* Search */}
             <div className="relative flex-1 min-w-[260px]">
               <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[14px] pointer-events-none" />
               <input
@@ -452,10 +469,8 @@ export default function ExpertsPage() {
               )}
             </div>
 
-            {/* Separateur */}
             <div className="w-px h-8 bg-[#0A2540]/[0.10] hidden sm:block" />
 
-            {/* Domain pills */}
             <div className="flex items-center gap-2.5 flex-wrap">
               {DOMAINS.map(d => (
                 <button
@@ -482,10 +497,9 @@ export default function ExpertsPage() {
       ══════════════════════════════ */}
       <section className="max-w-[1280px] mx-auto px-6 py-16">
 
-        {/* Titre section + compteur */}
         <FadeUp className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>
-            <h2 className="font-black text-[#0A2540] m-0 mb-1.5" style={{ fontSize:"clamp(22px,3vw,32px)" }}>
+            <h2 className="font-black text-[#0A2540] m-0 mb-1.5" style={{ fontSize: "clamp(22px,3vw,32px)" }}>
               {activeDomain === "tous" ? "Tous nos experts" : `Experts en ${DOMAINS.find(d => d.value === activeDomain)?.label}`}
             </h2>
             <p className="text-gray-500 text-[15px] m-0">
@@ -496,22 +510,23 @@ export default function ExpertsPage() {
           <Link href="/inscription">
             <button
               className="inline-flex items-center gap-2 bg-[#0A2540] text-white border-none rounded-xl px-6 py-3 font-bold text-[14px] cursor-pointer transition-all duration-200 hover:bg-[#F7B500] hover:text-[#0A2540] hover:-translate-y-0.5"
-              style={{ fontFamily:"inherit", boxShadow:"0 4px 16px rgba(10,37,64,0.20)" }}
+              style={{ fontFamily: "inherit", boxShadow: "0 4px 16px rgba(10,37,64,0.20)" }}
             >
               Devenir expert <FaArrowRight size={12} />
             </button>
           </Link>
         </FadeUp>
 
-        {/* Grille */}
         {filtered.length === 0 ? (
           <div className="text-center py-24">
             <div className="text-[56px] mb-4">🔍</div>
             <h3 className="text-[20px] font-black text-[#0A2540] mb-2">Aucun expert trouvé</h3>
             <p className="text-gray-500 text-[15px]">Essayez un autre terme de recherche ou sélectionnez un autre domaine.</p>
-            <button onClick={() => { setSearch(""); setActiveDomain("tous"); }}
+            <button
+              onClick={() => { setSearch(""); setActiveDomain("tous"); }}
               className="mt-6 inline-flex items-center gap-2 bg-[#F7B500] text-[#0A2540] border-none rounded-xl px-6 py-3 font-bold text-[14px] cursor-pointer"
-              style={{ fontFamily:"inherit" }}>
+              style={{ fontFamily: "inherit" }}
+            >
               Réinitialiser les filtres
             </button>
           </div>
@@ -530,16 +545,20 @@ export default function ExpertsPage() {
           CTA BAS DE PAGE
       ══════════════════════════════ */}
       <section className="bg-[#0A2540] py-20 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage:"radial-gradient(rgba(255,255,255,0.025) 1px,transparent 1px)", backgroundSize:"40px 40px" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
-          style={{ background:"radial-gradient(circle,rgba(247,181,0,0.07) 0%,transparent 65%)" }} />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.025) 1px,transparent 1px)", backgroundSize: "40px 40px" }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle,rgba(247,181,0,0.07) 0%,transparent 65%)" }}
+        />
 
         <FadeUp className="max-w-[640px] mx-auto text-center relative z-10">
           <span className="inline-block border border-[#F7B500]/35 text-[#F7B500] font-bold text-[12px] tracking-[3px] uppercase px-[18px] py-1.5 rounded-full mb-6">
             Rejoignez-nous
           </span>
-          <h2 className="font-black text-white m-0 mb-4 leading-[1.15]" style={{ fontSize:"clamp(28px,4vw,46px)" }}>
+          <h2 className="font-black text-white m-0 mb-4 leading-[1.15]" style={{ fontSize: "clamp(28px,4vw,46px)" }}>
             Vous êtes expert ?<br />
             <span className="text-[#F7B500]">Rejoignez notre réseau</span>
           </h2>
@@ -550,7 +569,7 @@ export default function ExpertsPage() {
             <Link href="/inscription">
               <button
                 className="inline-flex items-center gap-2 bg-[#F7B500] text-[#0A2540] border-none rounded-xl px-8 py-4 font-black text-[15px] cursor-pointer transition-all duration-200 hover:bg-[#e6a800] hover:-translate-y-0.5"
-                style={{ fontFamily:"inherit", boxShadow:"0 8px 24px rgba(247,181,0,0.35)" }}
+                style={{ fontFamily: "inherit", boxShadow: "0 8px 24px rgba(247,181,0,0.35)" }}
               >
                 Candidater comme expert <FaArrowRight size={14} />
               </button>
@@ -558,7 +577,7 @@ export default function ExpertsPage() {
             <Link href="/contact">
               <button
                 className="inline-flex items-center gap-2 bg-transparent text-white border border-white/25 rounded-xl px-8 py-4 font-bold text-[15px] cursor-pointer transition-all duration-200 hover:border-white/60 hover:-translate-y-0.5"
-                style={{ fontFamily:"inherit" }}
+                style={{ fontFamily: "inherit" }}
               >
                 En savoir plus
               </button>
@@ -585,13 +604,9 @@ function ExpertCard({ expert, onContact }: { expert: Expert; onContact: () => vo
   return (
     <div className="expert-card card-appear h-full">
 
-      {/* Bande couleur top */}
       <div className="h-[5px]" style={{ background: `linear-gradient(90deg,${expert.accentColor},transparent)` }} />
 
-      {/* Header de la carte */}
       <div className="relative px-6 pt-6 pb-5">
-
-        {/* Badge disponibilité */}
         <div className="absolute top-5 right-5">
           {expert.available ? (
             <div className="flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-full px-2.5 py-1">
@@ -606,18 +621,20 @@ function ExpertCard({ expert, onContact }: { expert: Expert; onContact: () => vo
           )}
         </div>
 
-        {/* Avatar + infos */}
         <div className="flex items-start gap-4">
           <div
             className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center font-black text-[22px] flex-shrink-0"
-            style={{ background: `linear-gradient(135deg,${expert.bgColor},${expert.bgColor}dd)`, color: expert.accentColor, border: `2px solid ${expert.accentColor}30` }}
+            style={{
+              background: `linear-gradient(135deg,${expert.bgColor},${expert.bgColor}dd)`,
+              color: expert.accentColor,
+              border: `2px solid ${expert.accentColor}30`,
+            }}
           >
             {expert.initials}
           </div>
           <div className="min-w-0 pt-1">
             <h3 className="font-black text-[#0A2540] text-[16px] m-0 mb-0.5 leading-snug">{expert.name}</h3>
             <p className="text-gray-500 text-[13px] font-semibold m-0 leading-snug">{expert.title}</p>
-            {/* Étoiles */}
             <div className="flex items-center gap-1 mt-2">
               {[...Array(5)].map((_, i) => (
                 <FaStar key={i} className="text-[10px]" style={{ color: i < Math.round(expert.rating) ? "#F7B500" : "#E5E7EB" }} />
@@ -629,7 +646,6 @@ function ExpertCard({ expert, onContact }: { expert: Expert; onContact: () => vo
         </div>
       </div>
 
-      {/* Badge domaine */}
       <div className="px-6 mb-4">
         <span
           className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full uppercase tracking-[1px]"
@@ -639,29 +655,24 @@ function ExpertCard({ expert, onContact }: { expert: Expert; onContact: () => vo
         </span>
       </div>
 
-      {/* Bio */}
       <div className="px-6 flex-1">
         <p className="text-gray-600 text-[13.5px] leading-[1.7] m-0 mb-5">{expert.bio}</p>
-
-        {/* Tags */}
         <div className="flex flex-wrap gap-1.5 mb-5">
           {expert.tags.map(t => (
             <span key={t} className="text-[11px] font-bold px-2.5 py-1 rounded-full text-gray-600"
-              style={{ background:"rgba(10,37,64,0.06)" }}>
+              style={{ background: "rgba(10,37,64,0.06)" }}>
               {t}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Stats + CTA */}
       <div className="px-6 pb-6">
-        {/* Stats rapides */}
         <div className="grid grid-cols-3 gap-2 mb-5">
           {[
-            { v: expert.missions, l: "Missions" },
+            { v: expert.missions, l: "Missions"   },
             { v: expert.xp,       l: "Expérience" },
-            { v: expert.reviews,  l: "Avis" },
+            { v: expert.reviews,  l: "Avis"       },
           ].map(s => (
             <div key={s.l} className="bg-[#f7f9fc] rounded-xl py-2.5 text-center border border-[#0A2540]/[0.05]">
               <div className="font-black text-[#0A2540] text-[14px] leading-none">{s.v}</div>
@@ -670,12 +681,11 @@ function ExpertCard({ expert, onContact }: { expert: Expert; onContact: () => vo
           ))}
         </div>
 
-        {/* Boutons */}
         <div className="flex gap-2.5">
           <button
             onClick={onContact}
             className="cta-btn flex-1 bg-[#0A2540] text-white border-none rounded-xl py-[11px] font-bold text-[13px] cursor-pointer flex items-center justify-center gap-2 transition-all duration-250"
-            style={{ fontFamily:"inherit" }}
+            style={{ fontFamily: "inherit" }}
           >
             Voir le profil <FaArrowRight size={11} />
           </button>

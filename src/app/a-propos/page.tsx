@@ -74,16 +74,14 @@ const navServices = [
   { label: "Audit sur site", slug: "audit-sur-site" },
   { label: "Accompagnement", slug: "accompagnement" },
   { label: "Formations",     slug: "formations"     },
-  { label: "Podcasts",       slug: "podcasts"       },
+  
 ];
 
 const stats = [
   { num: "2019",  label: "Année de création",      icon: <FaAward />     },
   { num: "200+",  label: "Startups accompagnées",  icon: <FaUsers />     },
   { num: "50+",   label: "Experts certifiés",      icon: <FaStar />      },
-  { num: "12M€",  label: "Levées facilitées",      icon: <FaChartLine /> },
   { num: "94%",   label: "Taux de satisfaction",   icon: <FaStar />      },
-  { num: "15+",   label: "Pays couverts",          icon: <FaGlobe />     },
 ];
 
 const timeline = [
@@ -107,7 +105,7 @@ const valuesDetails = [
     icon: <FaAward />,
     title: "Excellence",
     color: "#F7B500",
-    badge: "01",
+  
     desc: "Nous sélectionnons rigoureusement chaque expert pour garantir un niveau d'accompagnement exceptionnel. La qualité n'est pas un objectif — c'est notre standard minimum.",
     points: [
       "Certification obligatoire pour chaque expert",
@@ -119,7 +117,7 @@ const valuesDetails = [
     icon: <FaGlobe />,
     title: "Transparence",
     color: "#22C55E",
-    badge: "02",
+   
     desc: "Chaque interaction, chaque contrat, chaque résultat est documenté et partagé. Nous croyons que la confiance durable se construit dans la clarté totale.",
     points: [
       "Reporting détaillé de chaque mission",
@@ -131,7 +129,7 @@ const valuesDetails = [
     icon: <FaHandsHelping />,
     title: "Engagement",
     color: "#3B82F6",
-    badge: "03",
+    badge: "",
     desc: "Votre succès est notre succès. Nous nous impliquons bien au-delà de la prestation pour devenir de véritables partenaires de votre croissance à long terme.",
     points: [
       "Suivi post-mission inclus dans chaque contrat",
@@ -297,9 +295,7 @@ export default function APropos() {
               <span className="font-black text-[18px] text-[#0A2540] tracking-[-0.4px]">
                 Business <span className="text-[#F7B500]">Expert</span> Hub
               </span>
-              <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.8px] mt-[3px]">
-                Plateforme Experts &amp; Startups
-              </span>
+             
             </div>
           </Link>
 
@@ -386,22 +382,7 @@ export default function APropos() {
             <a href="#valeurs" className="btn-outline">Nos Valeurs <FaArrowRight size={12}/></a>
           </div>
 
-          <div className="flex items-center gap-8 flex-wrap">
-            {[
-              { val:"200+", label:"Startups"     },
-              { val:"50+",  label:"Experts"      },
-              { val:"94%",  label:"Satisfaction" },
-              { val:"12M€", label:"Levées"       },
-            ].map((item,i) => (
-              <div key={i} className="flex items-center gap-3">
-                {i > 0 && <div className="w-px h-9 bg-white/15"/>}
-                <div>
-                  <div className="text-[24px] font-black text-[#F7B500] leading-none">{item.val}</div>
-                  <div className="text-[11px] text-white/45 font-semibold uppercase tracking-wider mt-[3px]">{item.label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+       
         </div>
       </section>
 
@@ -533,10 +514,7 @@ export default function APropos() {
               <span className="text-[#F7B500]">privilégié</span>{" "}
               à l&apos;expertise
             </h2>
-            <p className="text-gray-500 text-[17px] max-w-[580px] mx-auto leading-[1.8]">
-              Notre mission est de doter chaque startup d&apos;un écosystème complet pour structurer,
-              accélérer et financer son développement à chaque étape.
-            </p>
+           
           </FadeUp>
 
           <div className="grid grid-cols-3 gap-7 mb-16">
@@ -652,9 +630,7 @@ export default function APropos() {
               Les valeurs qui nous{" "}
               <span className="text-[#F7B500]">définissent</span>
             </h2>
-            <p className="text-gray-500 text-[17px] max-w-[520px] mx-auto leading-[1.8]">
-              Trois principes fondamentaux guident chacune de nos décisions et de nos interactions quotidiennes.
-            </p>
+            
           </FadeUp>
 
           <div className="grid grid-cols-3 gap-8">

@@ -97,7 +97,7 @@ const navServices = [
   { label: "Audit sur site", slug: "audit-sur-site" },
   { label: "Accompagnement", slug: "accompagnement" },
   { label: "Formations",     slug: "formations"     },
-  { label: "Podcasts",       slug: "podcasts"       },
+ 
 ];
 
 /* ══════════════════════════════════════
@@ -324,9 +324,7 @@ export default function ContactPage() {
               <div className="font-black text-[18px] text-[#0A2540] leading-none tracking-[-0.4px]">
                 Business <span className="text-[#F7B500]">Expert</span> Hub
               </div>
-              <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.8px] mt-[3px]">
-                Plateforme Experts &amp; Startups
-              </div>
+             
             </div>
           </Link>
 

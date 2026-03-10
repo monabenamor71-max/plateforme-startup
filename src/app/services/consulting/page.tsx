@@ -136,13 +136,7 @@ export default function ConsultingPage() {
 
       <div className="max-w-[1200px] mx-auto px-6">
 
-        {/* EXPERTISES */}
-        <FadeUp><section className="py-16 border-b border-gray-100">
-          <div className="flex items-center gap-3 mb-8"><div className="bar h-8"/><h2 className="font-black text-[#0A2540] m-0 text-[26px]">Domaines d&apos;expertise</h2></div>
-          <div className="flex flex-wrap gap-3">
-            {EXPERTISES.map((ex,i)=><span key={i} className="chip"><FaCheckCircle style={{color:COLOR,fontSize:11}}/>{ex}</span>)}
-          </div>
-        </section></FadeUp>
+       
 
         {/* MÉTHODOLOGIE */}
         <section className="py-16 border-b border-gray-100">
